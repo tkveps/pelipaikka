@@ -1,1 +1,60 @@
 
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pelikortit – 2-1-2-1 pelataan yhdessä</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{--paper:#FDF9EF;--ink:#1E3A5F;--team:#2B6CB0;--opp:#D64545;--move:#1F9D55;--keeper:#F6B93B}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:"Baloo 2",system-ui,sans-serif;background:var(--paper);color:var(--ink);display:flex;justify-content:center;min-height:100vh}
+  .wrap{width:100%;max-width:430px;padding:26px 18px 40px}
+  .eyebrow{display:inline-block;background:var(--ink);color:#fff;font-weight:700;font-size:12px;letter-spacing:.12em;padding:4px 12px;border-radius:999px;margin-bottom:10px}
+  h1{font-weight:800;font-size:clamp(26px,7.5vw,32px);line-height:1.1;margin-bottom:6px}
+  .sub{font-size:15.5px;font-weight:600;color:#3E6B8F;margin-bottom:22px}
+  .cards{display:flex;flex-direction:column;gap:12px}
+  a.cardlink{display:flex;align-items:center;gap:14px;background:#fff;border:2.5px solid #DCE8F5;border-radius:18px;padding:14px 16px;text-decoration:none;color:var(--ink);box-shadow:0 4px 0 rgba(30,58,95,.08);transition:transform .1s}
+  a.cardlink:active{transform:translateY(2px);box-shadow:0 2px 0 rgba(30,58,95,.08)}
+  .num{flex-shrink:0;width:38px;height:38px;border-radius:50%;background:var(--team);color:#fff;font-weight:800;font-size:18px;display:flex;align-items:center;justify-content:center}
+  a.def .num{background:var(--opp)}
+  a.pri .num{background:var(--move)}
+  .txt b{display:block;font-size:17px;font-weight:800;line-height:1.15}
+  .txt span{font-size:13.5px;font-weight:600;color:#6B7A8D}
+  .sec{margin:24px 0 10px;font-weight:800;font-size:14px;color:#3E6B8F;letter-spacing:.08em;text-align:center}
+  a.pos .num{background:var(--move)}
+  .foot{margin-top:26px;text-align:center;font-size:13.5px;font-weight:600;color:#6B7A8D;line-height:1.6}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <span class="eyebrow">2-1-2-1 · PELATAAN YHDESSÄ</span>
+  <h1>⚽ Pelikortit</h1>
+  <p class="sub">Katso liike, napauta pelaajaa ja mieti: mihin sinä juoksisit?</p>
+
+  <nav class="cards">
+    <a class="cardlink pri" href="periaatekortti-levita-ja-kavenna.html"><span class="num">★</span><span class="txt"><b>🔁 Levitetään ja kavennetaan</b><span>Aloita tästä: iso kenttä hyökätessä, pieni puolustaessa</span></span></a>
+    <a class="cardlink" href="tilannekortti-1-maalivahdilla-pallo.html"><span class="num">1</span><span class="txt"><b>🧤 Maalivahdilla on pallo</b><span>Irrottaudutaan vartijasta ja avataan peli</span></span></a>
+    <a class="cardlink" href="tilannekortti-2-pakilla-pallo.html"><span class="num">2</span><span class="txt"><b>🛡️ Pakilla on pallo</b><span>Eteenpäin – tai varmasti taakse</span></span></a>
+    <a class="cardlink" href="tilannekortti-3-pallo-laidassa.html"><span class="num">3</span><span class="txt"><b>⚡ Pallo laidassa</b><span>Haetaan vapaasta paikasta ja autetaan</span></span></a>
+    <a class="cardlink" href="tilannekortti-4-pallo-keskella.html"><span class="num">4</span><span class="txt"><b>⭐ Pallo keskellä</b><span>Pelataan nopeasti eteenpäin</span></span></a>
+    <a class="cardlink def" href="tilannekortti-5-vastustaja-rakentaa.html"><span class="num">5</span><span class="txt"><b>🛑 Vastustaja rakentaa</b><span>Voitetaan pallo takaisin – yhdessä</span></span></a>
+    <a class="cardlink def" href="tilannekortti-6-vastustaja-hyokkaa.html"><span class="num">6</span><span class="txt"><b>🛡️ Vastustaja hyökkää</b><span>Estetään maali – merkitään pelaajat</span></span></a>
+    <a class="cardlink def" href="tilannekortti-7-menetimme-pallon.html"><span class="num">7</span><span class="txt"><b>😮 Menetimme pallon!</b><span>Voita heti takaisin – tai hidasta ja palaa</span></span></a>
+  </nav>
+
+  <p class="sec">🎽 PELIPAIKKAKORTIT – TÄNÄÄN SINÄ OLET…</p>
+  <nav class="cards">
+    <a class="cardlink pos" href="pelipaikkakortti-maalivahti.html"><span class="num">🧤</span><span class="txt"><b>Maalivahti</b><span>Tarjoudu, asemoidu, nouse mukaan</span></span></a>
+    <a class="cardlink pos" href="pelipaikkakortti-pakki.html"><span class="num">🛡️</span><span class="txt"><b>Pakki</b><span>Levittäydy, varmista, merkitse</span></span></a>
+    <a class="cardlink pos" href="pelipaikkakortti-keskikentta.html"><span class="num">⭐</span><span class="txt"><b>Keskikenttä</b><span>Pudottaudu vapaaksi, suojaa keskusta</span></span></a>
+    <a class="cardlink pos" href="pelipaikkakortti-vasen-laituri.html"><span class="num">⚡</span><span class="txt"><b>Laituri – vasen</b><span>Karkaa leveälle, nouse laitaa pitkin</span></span></a>
+    <a class="cardlink pos" href="pelipaikkakortti-oikea-laituri.html"><span class="num">⚡</span><span class="txt"><b>Laituri – oikea</b><span>Sama taito, oikea puoli</span></span></a>
+    <a class="cardlink pos" href="pelipaikkakortti-karki.html"><span class="num">🎯</span><span class="txt"><b>Kärki</b><span>Hae pelattavaksi, juokse selustaan, prässää</span></span></a>
+  </nav>
+
+  <p class="foot">Hyvä joukkue liikkuu ja auttaa toisiaan 💙<br>Yksi kortti kerrallaan – kokeile treeneissä!</p>
+</main>
+</body>
+</html>
