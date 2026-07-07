@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Periaatekortti – Levitetään ja kavennetaan</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{--paper:#FDF9EF;--ink:#1E3A5F;--grass1:#8FD07A;--grass2:#7CC468;--team:#2B6CB0;--keeper:#F6B93B;--opp:#D64545;--oppgk:#B0552F;--move:#1F9D55;--warn:#E8930C;--accent:#E8F3E2}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:"Baloo 2",system-ui,sans-serif;background:var(--paper);color:var(--ink);display:flex;justify-content:center;min-height:100vh}
+  .card{width:100%;max-width:430px;padding:18px 16px 28px}
+  .eyebrow{display:inline-block;background:var(--ink);color:#fff;font-weight:700;font-size:12px;letter-spacing:.12em;padding:4px 12px;border-radius:999px;margin-bottom:8px}
+  h1{font-weight:800;font-size:clamp(24px,7vw,30px);line-height:1.1;margin-bottom:10px}
+  .status{border-radius:14px;padding:10px 14px;margin-bottom:10px;text-align:center;font-weight:800;font-size:18px;color:#fff;background:var(--team);transition:background .5s}
+  .card.defend .status{background:var(--opp)}
+  .status small{display:block;font-weight:600;font-size:13.5px;opacity:.95;margin-top:2px}
+  .fieldwrap{border-radius:22px;overflow:hidden;box-shadow:0 6px 0 rgba(30,58,95,.12);margin-bottom:10px}
+  svg{display:block;width:100%;height:auto}
+  .player{transition:transform 1.5s cubic-bezier(.3,.85,.35,1)}
+  .shape{transition:opacity .7s ease}
+  .shape-wide{opacity:1}.shape-narrow{opacity:0}
+  .card.defend .shape-wide{opacity:0}.card.defend .shape-narrow{opacity:1}
+  .opp{opacity:0;transition:opacity .6s ease}
+  .ballUs{transition:opacity .5s ease}
+  .card.defend .ballUs{opacity:0}
+  .card.defend .opp{opacity:1}
+  @media (prefers-reduced-motion: reduce){.player{transition:none}.shape,.opp{transition:none}}
+  .btnrow{display:flex;justify-content:center;margin-bottom:10px}
+  .bigbtn{background:var(--ink);border:none;color:#fff;font-family:inherit;font-weight:800;font-size:16px;padding:12px 22px;border-radius:999px;cursor:pointer;box-shadow:0 4px 0 rgba(30,58,95,.25)}
+  .bigbtn:active{transform:translateY(2px);box-shadow:0 2px 0 rgba(30,58,95,.25)}
+  .bigbtn:focus-visible{outline:3px solid var(--move);outline-offset:3px}
+  .legend{font-size:12.5px;color:#6B7A8D;text-align:center;margin-bottom:12px}
+  .legend b.red{color:var(--opp)}.legend b.blue{color:var(--team)}
+  .rules{list-style:none;display:flex;flex-direction:column;gap:8px}
+  .rules li{background:#fff;border:2px solid #DCE8F5;border-radius:14px;padding:9px 12px;font-size:15.5px;font-weight:600;display:flex;align-items:center;gap:10px}
+  .rules .roleicon{font-size:20px;flex-shrink:0}
+</style>
+</head>
+<body>
+<main class="card" id="card">
+  <span class="eyebrow">PERIAATEKORTTI</span>
+  <h1>Levitetään ja kavennetaan</h1>
+
+  <div class="status" id="status">
+    <span id="statusMain">MEILLÄ PALLO → LEVITETÄÄN 🔵</span>
+    <small id="statusSub">Iso kenttä = enemmän tilaa pelata.</small>
+  </div>
+
+  <div class="fieldwrap">
+  <svg viewBox="0 0 340 500" role="img" aria-label="Sama joukkue levittäytyy kun meillä on pallo ja kaventuu kun vastustajalla on pallo, mutta laiturit pitävät laidat kiinni">
+    <rect width="340" height="500" fill="var(--grass1)"/>
+    <g fill="var(--grass2)"><rect y="0" width="340" height="62"/><rect y="124" width="340" height="62"/><rect y="248" width="340" height="62"/><rect y="372" width="340" height="62"/></g>
+    <g stroke="#fff" stroke-width="3" fill="none" opacity=".9">
+      <rect x="10" y="10" width="320" height="480" rx="6"/><line x1="10" y1="250" x2="330" y2="250"/><circle cx="170" cy="250" r="34"/>
+      <rect x="100" y="10" width="140" height="42"/><rect x="100" y="448" width="140" height="42"/>
+    </g>
+
+    <!-- VASTUSTAJAT: kaikki 7, näkyvät kun HEILLÄ on pallo -->
+    <g class="opp">
+      <g transform="translate(170 30)"><circle r="18" fill="var(--oppgk)" stroke="#fff" stroke-width="3"/><text y="6" text-anchor="middle" font-size="16">🧤</text></g>
+      <g transform="translate(170 205)"><circle r="18" fill="var(--opp)" stroke="#fff" stroke-width="3"/><text y="7" text-anchor="middle" font-size="17">😼</text></g>
+      <g transform="translate(45 300)"><circle r="18" fill="var(--opp)" stroke="#fff" stroke-width="3"/><text y="7" text-anchor="middle" font-size="17">😼</text></g>
+      <g transform="translate(295 300)"><circle r="18" fill="var(--opp)" stroke="#fff" stroke-width="3"/><text y="7" text-anchor="middle" font-size="17">😼</text></g>
+      <g transform="translate(112 250)"><circle r="18" fill="var(--opp)" stroke="#fff" stroke-width="3"/><text y="7" text-anchor="middle" font-size="17">😼</text></g>
+      <g transform="translate(228 250)"><circle r="18" fill="var(--opp)" stroke="#fff" stroke-width="3"/><text y="7" text-anchor="middle" font-size="17">😼</text></g>
+      <g transform="translate(170 345)"><circle r="18" fill="var(--opp)" stroke="#fff" stroke-width="3"/><text y="7" text-anchor="middle" font-size="17">😼</text></g>
+      <g transform="translate(170 234)"><circle r="8" fill="#fff" stroke="var(--ink)" stroke-width="1.6"/><path d="M0 -4 l3.8 2.8 -1.5 4.6 -4.6 0 -1.5 -4.6 z" fill="var(--ink)"/></g>
+    </g>
+
+    <polygon class="shape shape-wide"   points="170,90 300,220 265,360 75,360 40,220"
+             fill="rgba(43,108,176,.16)" stroke="rgba(43,108,176,.55)" stroke-width="2.5"/>
+    <polygon class="shape shape-narrow" points="170,240 272,315 212,382 128,382 68,315"
+             fill="rgba(43,108,176,.26)" stroke="rgba(43,108,176,.7)" stroke-width="2.5"/>
+
+    <g class="ballUs" transform="translate(170 278)"><circle r="8" fill="#fff" stroke="var(--ink)" stroke-width="1.6"/><path d="M0 -4 l3.8 2.8 -1.5 4.6 -4.6 0 -1.5 -4.6 z" fill="var(--ink)"/></g>
+
+    <g id="players">
+      <g class="player" data-ax="170" data-ay="90"  data-dx="170" data-dy="240"><circle r="20" fill="var(--team)" stroke="#fff" stroke-width="3"/><text y="7" text-anchor="middle" font-size="20">🎯</text></g>
+      <g class="player" data-ax="40"  data-ay="220" data-dx="68"  data-dy="315"><circle r="20" fill="var(--team)" stroke="#fff" stroke-width="3"/><text y="7" text-anchor="middle" font-size="20">⚡</text></g>
+      <g class="player" data-ax="300" data-ay="220" data-dx="272" data-dy="315"><circle r="20" fill="var(--team)" stroke="#fff" stroke-width="3"/><text y="7" text-anchor="middle" font-size="20">⚡</text></g>
+      <g class="player" data-ax="170" data-ay="250" data-dx="170" data-dy="320"><circle r="20" fill="var(--team)" stroke="#fff" stroke-width="3"/><text y="7" text-anchor="middle" font-size="20">⭐</text></g>
+      <g class="player" data-ax="75"  data-ay="360" data-dx="128" data-dy="382"><circle r="20" fill="var(--team)" stroke="#fff" stroke-width="3"/><text y="7" text-anchor="middle" font-size="20">🛡️</text></g>
+      <g class="player" data-ax="265" data-ay="360" data-dx="212" data-dy="382"><circle r="20" fill="var(--team)" stroke="#fff" stroke-width="3"/><text y="7" text-anchor="middle" font-size="20">🛡️</text></g>
+      <g class="player" data-ax="170" data-ay="460" data-dx="170" data-dy="465"><circle r="20" fill="var(--keeper)" stroke="#fff" stroke-width="3"/><text y="7" text-anchor="middle" font-size="20">🧤</text></g>
+    </g>
+  </svg>
+  </div>
+
+  <div class="btnrow"><button class="bigbtn" id="toggle">🔁 Vaihda tilanne</button></div>
+  <p class="legend"><b class="blue">● Sininen</b> = meidän joukkue &nbsp;·&nbsp; <b class="red">● Punainen</b> = vastustaja (näkyy kun heillä on pallo)</p>
+
+  <ul class="rules">
+    <li><span class="roleicon">🔵</span>Meillä pallo: <b>levitetään</b> – laiturit laitaan, kärki ylös.</li>
+    <li><span class="roleicon">🛡️</span>Heillä pallo: <b>kavennetaan keskeltä</b> – mutta laiturit pitävät laidat kiinni.</li>
+    <li><span class="roleicon">⚡</span>Ei ryntätä kaikki keskelle – muuten vastustaja kiertää laidasta!</li>
+  </ul>
+</main>
+<script>
+  const card=document.getElementById('card'),players=[...document.querySelectorAll('.player')],statusMain=document.getElementById('statusMain'),statusSub=document.getElementById('statusSub');
+  let defend=false;
+  function place(p,x,y){p.style.transform='translate('+x+'px, '+y+'px)';}
+  function apply(){
+    players.forEach(p=>{const x=defend?+p.dataset.dx:+p.dataset.ax,y=defend?+p.dataset.dy:+p.dataset.ay;place(p,x,y);});
+    card.classList.toggle('defend',defend);
+    statusMain.textContent=defend?'HEILLÄ PALLO → KAVENNETAAN 🛡️':'MEILLÄ PALLO → LEVITETÄÄN 🔵';
+    statusSub.textContent=defend?'Pieni kenttä keskellä – mutta laidat kiinni!':'Iso kenttä = enemmän tilaa pelata.';
+  }
+  players.forEach(p=>{p.style.transition='none';place(p,+p.dataset.ax,+p.dataset.ay);p.getBoundingClientRect();p.style.transition='';});
+  document.getElementById('toggle').addEventListener('click',()=>{defend=!defend;apply();});
+</script>
+</body>
+</html>

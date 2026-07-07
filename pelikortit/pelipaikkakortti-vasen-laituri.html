@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pelipaikkakortti – Vasen laituri</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{--paper:#FDF9EF;--ink:#1E3A5F;--grass1:#8FD07A;--grass2:#7CC468;--team:#2B6CB0;--keeper:#F6B93B;--opp:#D64545;--oppgk:#B0552F;--move:#1F9D55;--warn:#E8930C;--accent:#E8F3E2}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:"Baloo 2",system-ui,sans-serif;background:var(--paper);color:var(--ink);display:flex;justify-content:center;min-height:100vh}
+  .card{width:100%;max-width:430px;padding:18px 16px 28px}
+  .eyebrow{display:inline-block;background:var(--move);color:#fff;font-weight:700;font-size:12px;letter-spacing:.12em;padding:4px 12px;border-radius:999px;margin-bottom:8px}
+  h1{font-weight:800;font-size:clamp(23px,6.6vw,29px);line-height:1.1;margin-bottom:4px}
+  .sub{font-size:15px;font-weight:600;color:#3E6B8F;margin-bottom:12px}
+  .tabs{display:flex;gap:8px;margin-bottom:10px}
+  .tabs button{flex:1;background:#fff;border:2.5px solid #DCE8F5;border-radius:12px;padding:8px 4px;font-family:inherit;font-weight:800;font-size:14px;color:#6B7A8D;cursor:pointer}
+  .tabs button.active{border-color:var(--move);color:var(--move);background:var(--accent)}
+  .tabs button.cleared{border-color:var(--move);color:#fff;background:var(--move)}
+  .sit-title{background:var(--accent);border:2px solid #CFE6C6;border-radius:12px;padding:8px 12px;text-align:center;font-size:15.5px;font-weight:700;margin-bottom:10px}
+  .fieldwrap{border-radius:22px;overflow:hidden;box-shadow:0 6px 0 rgba(30,58,95,.12);margin-bottom:10px}
+  svg{display:block;width:100%;height:auto}
+  .dim{opacity:.45}
+  #you{transition:transform 1.4s cubic-bezier(.25,.8,.35,1)}
+  #you .ring{animation:pulse 1.6s ease-in-out infinite}
+  @keyframes pulse{0%,100%{stroke-opacity:.9}50%{stroke-opacity:.25}}
+  @media (prefers-reduced-motion: reduce){#you{transition:none}#you .ring{animation:none}}
+  .target{cursor:pointer}
+  .target circle{fill:rgba(255,255,255,.55);stroke:var(--move);stroke-width:3;stroke-dasharray:6 5}
+  .target text{font-weight:800;fill:var(--move);font-size:18px}
+  .target.wrongpick circle{stroke:var(--warn)}
+  .target.wrongpick text{fill:var(--warn)}
+  .target.hint circle{fill:rgba(31,157,85,.30);stroke-width:4.5;stroke-dasharray:none}
+  .feedback{min-height:44px;margin-bottom:8px;font-size:16px;font-weight:800;text-align:center;line-height:1.3}
+  .feedback.good{color:var(--move)}.feedback.warn{color:var(--warn)}
+  .btnrow{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+  .btnrow button{background:none;border:2px solid #C9D9EA;color:#3E6B8F;font-family:inherit;font-weight:700;font-size:14px;padding:8px 15px;border-radius:999px;cursor:pointer}
+  .btnrow button:disabled{opacity:.4;cursor:default}
+  .btnrow button.primary{background:var(--ink);border-color:var(--ink);color:#fff;font-weight:800}
+  .legend{font-size:12.5px;color:#6B7A8D;text-align:center;margin-top:10px}
+  button:focus-visible,.target:focus-visible circle{outline:3px solid var(--move);outline-offset:2px}
+</style>
+</head>
+<body>
+<main class="card" id="card">
+  <span class="eyebrow">PELIPAIKKAKORTTI · TÄNÄÄN SINÄ OLET</span>
+  <h1>⚡ Vasen laituri</h1>
+  <p class="sub">Kolme tilannetta. Napauta kentältä paikka, johon <b>sinä</b> juokset!</p>
+
+  <div class="tabs">
+    <button id="tab0" class="active">Tilanne 1</button>
+    <button id="tab1">Tilanne 2</button>
+    <button id="tab2">Tilanne 3</button>
+  </div>
+  <div class="sit-title" id="sitTitle"></div>
+
+  <div class="fieldwrap">
+  <svg viewBox="0 0 340 500" role="img" id="svg" aria-label="Kenttä pelaajan silmin: valitse mihin liikut">
+    <rect width="340" height="500" fill="var(--grass1)"/>
+    <g fill="var(--grass2)"><rect y="0" width="340" height="62"/><rect y="124" width="340" height="62"/><rect y="248" width="340" height="62"/><rect y="372" width="340" height="62"/></g>
+    <g stroke="#fff" stroke-width="3" fill="none" opacity=".9">
+      <rect x="10" y="10" width="320" height="480" rx="6"/><line x1="10" y1="250" x2="330" y2="250"/><circle cx="170" cy="250" r="34"/>
+      <rect x="100" y="10" width="140" height="42"/><rect x="100" y="448" width="140" height="42"/>
+    </g>
+    <g id="scene"></g>
+    <g id="targets"></g>
+    <g id="you"></g>
+  </svg>
+  </div>
+
+  <div class="feedback" id="feedback" aria-live="polite">Mihin sinä liikut? Napauta ?-ympyrää.</div>
+  <div class="btnrow">
+    <button id="retry">↺ Uudestaan</button>
+    <button id="hint">💡 Vinkki</button>
+    <button id="next" class="primary" disabled>Seuraava →</button>
+  </div>
+  <p class="legend">Kirkas ⚡ = sinä · himmeät = kaverit ja vastustajat</p>
+</main>
+
+<script>
+const SITS = [
+ {
+  "title": "🧤 Maalivahdilla on pallo",
+  "you": {
+   "x": 112,
+   "y": 252
+  },
+  "mates": [
+   {
+    "x": 170,
+    "y": 455,
+    "e": "🧤",
+    "gk": true
+   },
+   {
+    "x": 70,
+    "y": 390,
+    "e": "🛡️"
+   },
+   {
+    "x": 270,
+    "y": 390,
+    "e": "🛡️"
+   },
+   {
+    "x": 170,
+    "y": 328,
+    "e": "⭐"
+   },
+   {
+    "x": 298,
+    "y": 250,
+    "e": "⚡"
+   },
+   {
+    "x": 206,
+    "y": 158,
+    "e": "🎯"
+   }
+  ],
+  "reds": [
+   {
+    "x": 108,
+    "y": 244
+   },
+   {
+    "x": 170,
+    "y": 250
+   },
+   {
+    "x": 166,
+    "y": 150
+   }
+  ],
+  "ball": {
+   "x": 196,
+   "y": 468
+  },
+  "targets": [
+   {
+    "x": 42,
+    "y": 250,
+    "ok": true,
+    "msg": "Karkasit leveälle – nyt maalivahti näkee sinut! ✅"
+   },
+   {
+    "x": 138,
+    "y": 296,
+    "ok": false,
+    "msg": "Keskellä on ruuhkaa. Laituri pitää leveyttä – kokeile toista!"
+   },
+   {
+    "x": 104,
+    "y": 192,
+    "ok": false,
+    "msg": "Olet vartijan selän takana – et näy pallolliselle. Kokeile toista!"
+   }
+  ]
+ },
+ {
+  "title": "⭐ Pallo keskikentällä",
+  "you": {
+   "x": 48,
+   "y": 228
+  },
+  "mates": [
+   {
+    "x": 170,
+    "y": 465,
+    "e": "🧤",
+    "gk": true
+   },
+   {
+    "x": 110,
+    "y": 352,
+    "e": "🛡️"
+   },
+   {
+    "x": 230,
+    "y": 352,
+    "e": "🛡️"
+   },
+   {
+    "x": 170,
+    "y": 258,
+    "e": "⭐"
+   },
+   {
+    "x": 292,
+    "y": 228,
+    "e": "⚡"
+   },
+   {
+    "x": 198,
+    "y": 196,
+    "e": "🎯"
+   }
+  ],
+  "reds": [
+   {
+    "x": 60,
+    "y": 200
+   },
+   {
+    "x": 120,
+    "y": 100
+   },
+   {
+    "x": 170,
+    "y": 170
+   }
+  ],
+  "ball": {
+   "x": 170,
+   "y": 230
+  },
+  "targets": [
+   {
+    "x": 44,
+    "y": 145,
+    "ok": true,
+    "msg": "Nousit laitaa pitkin vartijan selustaan! ✅"
+   },
+   {
+    "x": 104,
+    "y": 252,
+    "ok": false,
+    "msg": "Älä tule palloa kohti – siellä on jo kavereita. Kokeile toista!"
+   },
+   {
+    "x": 48,
+    "y": 315,
+    "ok": false,
+    "msg": "Meillä on pallo – nyt ei pudottauduta, vaan noustaan! Kokeile toista!"
+   }
+  ]
+ },
+ {
+  "title": "🛑 Vastustajalla on pallo",
+  "you": {
+   "x": 54,
+   "y": 212
+  },
+  "mates": [
+   {
+    "x": 170,
+    "y": 470,
+    "e": "🧤",
+    "gk": true
+   },
+   {
+    "x": 120,
+    "y": 352,
+    "e": "🛡️"
+   },
+   {
+    "x": 222,
+    "y": 352,
+    "e": "🛡️"
+   },
+   {
+    "x": 208,
+    "y": 238,
+    "e": "⭐"
+   },
+   {
+    "x": 262,
+    "y": 272,
+    "e": "⚡"
+   },
+   {
+    "x": 172,
+    "y": 214,
+    "e": "🎯"
+   }
+  ],
+  "reds": [
+   {
+    "x": 240,
+    "y": 200
+   },
+   {
+    "x": 60,
+    "y": 258
+   },
+   {
+    "x": 170,
+    "y": 275
+   }
+  ],
+  "ball": {
+   "x": 244,
+   "y": 224
+  },
+  "targets": [
+   {
+    "x": 90,
+    "y": 286,
+    "ok": true,
+    "msg": "Otit oman pelaajan kiinni sisäkautta – hän ei pääse keskelle! ✅"
+   },
+   {
+    "x": 36,
+    "y": 290,
+    "ok": false,
+    "msg": "Laidan puolelta hän pääsee kääntymään keskelle. Ota sisäkautta! Kokeile toista!"
+   },
+   {
+    "x": 204,
+    "y": 188,
+    "ok": false,
+    "msg": "Älä ryntää palloon – kaveri hoitaa sen. Sinä otat oman pelaajan. Kokeile toista!"
+   }
+  ]
+ }
+];
+
+const scene=document.getElementById('scene'),targetsG=document.getElementById('targets'),youG=document.getElementById('you');
+const feedback=document.getElementById('feedback'),nextBtn=document.getElementById('next'),retryBtn=document.getElementById('retry'),hintBtn=document.getElementById('hint');
+const tabs=[0,1,2].map(i=>document.getElementById('tab'+i));
+let cur=0, solved=[false,false,false];
+const NS='http://www.w3.org/2000/svg';
+
+function el(name,attrs,parent){const n=document.createElementNS(NS,name);for(const k in attrs)n.setAttribute(k,attrs[k]);parent.appendChild(n);return n;}
+
+function drawPlayer(parent,p,team){
+  const g=el('g',{transform:`translate(${p.x} ${p.y})`,class:'dim'},parent);
+  const fill=p.gk?(team==='red'?'var(--oppgk)':'var(--keeper)'):(team==='red'?'var(--opp)':'var(--team)');
+  el('circle',{r:18,fill,stroke:'#fff','stroke-width':3},g);
+  const t=el('text',{y:6,'text-anchor':'middle','font-size':16},g);
+  t.textContent = team==='red' ? (p.gk?'🧤':'😼') : p.e;
+}
+
+function load(i){
+  cur=i; const s=SITS[i];
+  document.getElementById('sitTitle').textContent=s.title;
+  tabs.forEach((t,j)=>{t.className = solved[j]?'cleared':(j===i?'active':'');});
+  scene.innerHTML=''; targetsG.innerHTML=''; youG.innerHTML='';
+  s.mates.forEach(p=>drawPlayer(scene,p,'blue'));
+  s.reds.forEach(p=>drawPlayer(scene,p,'red'));
+  const b=el('g',{transform:`translate(${s.ball.x} ${s.ball.y})`},scene);
+  el('circle',{r:8,fill:'#fff',stroke:'var(--ink)','stroke-width':1.6},b);
+  el('path',{d:'M0 -4 l3.8 2.8 -1.5 4.6 -4.6 0 -1.5 -4.6 z',fill:'var(--ink)'},b);
+  youG.style.transition='none';
+  youG.style.transform=`translate(${s.you.x}px, ${s.you.y}px)`;
+  youG.getBoundingClientRect(); youG.style.transition='';
+  el('circle',{class:'ring',r:27,fill:'none',stroke:'var(--move)','stroke-width':4},youG);
+  el('circle',{r:20,fill:'var(--team)',stroke:'#fff','stroke-width':3},youG);
+  const yt=el('text',{y:7,'text-anchor':'middle','font-size':20},youG); yt.textContent='⚡';
+  s.targets.forEach(t=>{
+    const g=el('g',{class:'target',tabindex:0,transform:`translate(${t.x} ${t.y})`},targetsG);
+    el('circle',{r:20},g);
+    const q=el('text',{y:7,'text-anchor':'middle'},g); q.textContent='?';
+    const pick=()=>choose(g,t);
+    g.addEventListener('click',pick);
+    g.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();pick();}});
+  });
+  feedback.textContent='Mihin sinä liikut? Napauta ?-ympyrää.';
+  feedback.className='feedback';
+  nextBtn.disabled=!solved[i];
+  nextBtn.textContent = i<2 ? 'Seuraava →' : 'Valmis!';
+}
+
+function choose(g,t){
+  if(t.ok){
+    feedback.textContent=t.msg; feedback.className='feedback good';
+    targetsG.innerHTML='';
+    youG.style.transform=`translate(${t.x}px, ${t.y}px)`;
+    solved[cur]=true; tabs[cur].className='cleared';
+    nextBtn.disabled=false;
+    if(cur===2 && solved.every(Boolean)){
+      setTimeout(()=>{feedback.textContent='Mahtavaa! Nyt tiedät, mihin laituri juoksee. Kokeile treeneissä! ⚡';},1500);
+    }
+  }else{
+    feedback.textContent=t.msg; feedback.className='feedback warn';
+    g.classList.add('wrongpick');
+  }
+}
+
+hintBtn.addEventListener('click',()=>{
+  if(solved[cur]) return;
+  [...targetsG.children].forEach((g,idx)=>{ if(SITS[cur].targets[idx].ok) g.classList.add('hint'); });
+  feedback.textContent='Katso hehkuvaa ympyrää – sinne kannattaa!';
+  feedback.className='feedback good';
+});
+tabs.forEach((t,i)=>t.addEventListener('click',()=>load(i)));
+retryBtn.addEventListener('click',()=>{solved[cur]=false;load(cur);});
+nextBtn.addEventListener('click',()=>{ if(cur<2) load(cur+1); });
+load(0);
+</script>
+</body>
+</html>

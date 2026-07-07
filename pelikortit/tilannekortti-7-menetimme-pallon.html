@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tilannekortti 7 – Menetimme pallon!</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{--paper:#FDF9EF;--ink:#1E3A5F;--grass1:#8FD07A;--grass2:#7CC468;--team:#2B6CB0;--keeper:#F6B93B;--opp:#D64545;--oppgk:#B0552F;--move:#1F9D55;--warn:#E8930C;--accent:#E8F3E2}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:"Baloo 2",system-ui,sans-serif;background:var(--paper);color:var(--ink);display:flex;justify-content:center;min-height:100vh}
+  .card{width:100%;max-width:430px;padding:18px 16px 28px}
+  .eyebrow{display:inline-block;background:var(--ink);color:#fff;font-weight:700;font-size:12px;letter-spacing:.12em;padding:4px 12px;border-radius:999px;margin-bottom:8px}
+  h1{font-weight:800;font-size:clamp(23px,6.6vw,29px);line-height:1.1;margin-bottom:4px}
+  .goal{font-size:15px;font-weight:600;color:#3E6B8F;margin-bottom:10px}
+  .goal strong{color:var(--move)}
+  .ask{background:var(--accent);border:2px solid #CFE6C6;border-radius:12px;padding:8px 12px;text-align:center;font-size:15.5px;font-weight:700;margin-bottom:10px}
+  .fieldwrap{border-radius:22px;overflow:hidden;box-shadow:0 6px 0 rgba(30,58,95,.12);margin-bottom:10px}
+  svg{display:block;width:100%;height:auto}
+  .player{transition:transform 1.8s cubic-bezier(.25,.8,.35,1)}
+  .p-1{transition-delay:.15s}.p-2{transition-delay:.35s}.p-3{transition-delay:.55s}.p-4{transition-delay:.8s}
+  .arrow{opacity:0;transition:opacity .8s ease}
+  .card.done .arrow{opacity:1}
+  .opp{opacity:0;transition:opacity .5s ease;pointer-events:none}
+  .card.show-opp .opp{opacity:1;pointer-events:auto}
+  .player circle.jersey,.redp circle.jersey{cursor:pointer}
+  .picked-good circle.jersey{stroke:var(--move);stroke-width:5}
+  .picked-warn circle.jersey{stroke:var(--warn);stroke-width:5}
+  @media (prefers-reduced-motion: reduce){.player{transition:none!important}.arrow,.opp{transition:none}.card.done .arrow{opacity:1}}
+  .btnrow{display:flex;gap:10px;justify-content:center;margin-bottom:8px;flex-wrap:wrap}
+  .btnrow button{background:none;border:2px solid #C9D9EA;color:#3E6B8F;font-family:inherit;font-weight:700;font-size:14px;padding:7px 15px;border-radius:999px;cursor:pointer}
+  .btnrow button:active{background:#EDF3FA}
+  .btnrow button.toggled{border-color:var(--opp);color:var(--opp);background:#FDEEEA}
+  .feedback{min-height:26px;margin-bottom:10px;font-size:16px;font-weight:800;text-align:center}
+  .feedback.good{color:var(--move)}.feedback.warn{color:var(--warn)}
+  .legend{font-size:12.5px;color:#6B7A8D;text-align:center;margin-bottom:12px}
+  .legend b.red{color:var(--opp)}.legend b.blue{color:var(--team)}
+  .rules{list-style:none;display:flex;flex-direction:column;gap:8px}
+  .rules li{background:#fff;border:2px solid #DCE8F5;border-radius:14px;padding:9px 12px;font-size:16px;font-weight:600;display:flex;align-items:center;gap:10px}
+  .rules .roleicon{font-size:20px;flex-shrink:0}
+  button:focus-visible,.player circle.jersey:focus-visible,.redp circle.jersey:focus-visible{outline:3px solid var(--move);outline-offset:2px}
+</style>
+</head>
+<body>
+<main class="card show-opp" id="card">
+  <span class="eyebrow">TILANNEKORTTI 7</span>
+  <h1>😮 Menetimme pallon!</h1>
+  <p class="goal">Tavoite: <strong>voita pallo heti takaisin – tai hidasta ja palaa.</strong></p>
+  <p class="ask">Napauta pelaajaa: mikä on sinun tehtäväsi juuri nyt?</p>
+
+  <div class="fieldwrap">
+  <svg viewBox="0 0 340 500" role="img" aria-label="Pallo menetettiin keskikentällä: lähin painostaa heti, lähellä olevat auttavat, muut palaavat paikoilleen">
+    <rect width="340" height="500" fill="var(--grass1)"/>
+    <g fill="var(--grass2)"><rect y="0" width="340" height="62"/><rect y="124" width="340" height="62"/><rect y="248" width="340" height="62"/><rect y="372" width="340" height="62"/></g>
+    <g stroke="#fff" stroke-width="3" fill="none" opacity=".9">
+      <rect x="10" y="10" width="320" height="480" rx="6"/><line x1="10" y1="250" x2="330" y2="250"/><circle cx="170" cy="250" r="34"/>
+      <rect x="100" y="10" width="140" height="42"/><rect x="100" y="448" width="140" height="42"/>
+    </g>
+    <defs>
+      <marker id="ah" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 Z" fill="var(--move)"/></marker>
+      <marker id="ar" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 Z" fill="var(--opp)"/></marker>
+    </defs>
+    <!-- omat reaktiot (vihreä): lähin prässää, lähellä olevat auttavat, kärki pysyy valmiina -->
+    <g class="arrow" stroke="var(--move)" stroke-width="4" fill="none" marker-end="url(#ah)" stroke-linecap="round">
+      <line x1="222" y1="277" x2="206" y2="270"/>   <!-- keskikenttä (lähin) prässää heti -->
+      <line x1="60"  y1="192" x2="94"  y2="230"/>   <!-- vasen laituri auttaa läheltä -->
+      <line x1="280" y1="200" x2="261" y2="237"/>   <!-- oikea laituri palaa auttamaan -->
+      <line x1="170" y1="132" x2="170" y2="149"/>   <!-- kärki pudottautuu hieman, pysyy valmiina -->
+    </g>
+    <!-- vastustajan kärjen uhkaava juoksu (punainen katkoviiva) -->
+    <g class="opp"><line x1="203" y1="342" x2="206" y2="392" stroke="var(--opp)" stroke-width="3.5" stroke-dasharray="7 6" marker-end="url(#ar)"/></g>
+
+    <!-- pallo vastustajan jalassa (juuri riistetty) -->
+    <g transform="translate(166 263)"><circle r="8" fill="#fff" stroke="var(--ink)" stroke-width="1.6"/><path d="M0 -4 l3.8 2.8 -1.5 4.6 -4.6 0 -1.5 -4.6 z" fill="var(--ink)"/></g>
+
+    <!-- VASTUSTAJAT: riistäjä keskellä, kärki jo karkumatkalla, muut nousevat -->
+    <g class="opp">
+      <g transform="translate(170 28)"><circle r="18" fill="var(--oppgk)" stroke="#fff" stroke-width="3"/><text y="6" text-anchor="middle" font-size="16">🧤</text></g>
+      <g transform="translate(120 95)"><circle r="18" fill="var(--opp)" stroke="#fff" stroke-width="3"/><text y="7" text-anchor="middle" font-size="17">😼</text></g>
+      <g transform="translate(220 95)"><circle r="18" fill="var(--opp)" stroke="#fff" stroke-width="3"/><text y="7" text-anchor="middle" font-size="17">😼</text></g>
+      <g transform="translate(84 205)"><circle r="18" fill="var(--opp)" stroke="#fff" stroke-width="3"/><text y="7" text-anchor="middle" font-size="17">😼</text></g>
+      <g transform="translate(268 215)"><circle r="18" fill="var(--opp)" stroke="#fff" stroke-width="3"/><text y="7" text-anchor="middle" font-size="17">😼</text></g>
+      <g transform="translate(160 235)"><circle r="18" fill="var(--opp)" stroke="#fff" stroke-width="3"/><text y="7" text-anchor="middle" font-size="17">😼</text></g>
+      <g transform="translate(200 318)"><circle r="18" fill="var(--opp)" stroke="#fff" stroke-width="3"/><text y="7" text-anchor="middle" font-size="17">😼</text></g>
+    </g>
+
+    <g id="players">
+      <g class="player p-3" data-side="karki" data-sx="170" data-sy="120" data-x="170" data-y="170">
+        <circle class="jersey" tabindex="0" r="20" fill="var(--team)" stroke="#fff" stroke-width="3"/><text y="7" text-anchor="middle" font-size="20">🎯</text></g>
+      <g class="player p-1" data-side="wingL" data-sx="50" data-sy="180" data-x="108" data-y="246">
+        <circle class="jersey" tabindex="0" r="20" fill="var(--team)" stroke="#fff" stroke-width="3"/><text y="7" text-anchor="middle" font-size="20">⚡</text></g>
+      <g class="player p-1" data-side="wingR" data-sx="290" data-sy="180" data-x="252" data-y="256">
+        <circle class="jersey" tabindex="0" r="20" fill="var(--team)" stroke="#fff" stroke-width="3"/><text y="7" text-anchor="middle" font-size="20">⚡</text></g>
+      <g class="player" data-side="mid" data-sx="230" data-sy="280" data-x="186" data-y="262">
+        <circle class="jersey" tabindex="0" r="20" fill="var(--team)" stroke="#fff" stroke-width="3"/><text y="7" text-anchor="middle" font-size="20">⭐</text></g>
+      <g class="player p-2" data-side="backL" data-sx="110" data-sy="330" data-x="126" data-y="352">
+        <circle class="jersey" tabindex="0" r="20" fill="var(--team)" stroke="#fff" stroke-width="3"/><text y="7" text-anchor="middle" font-size="20">🛡️</text></g>
+      <g class="player p-2" data-side="backR" data-sx="230" data-sy="330" data-x="222" data-y="350">
+        <circle class="jersey" tabindex="0" r="20" fill="var(--team)" stroke="#fff" stroke-width="3"/><text y="7" text-anchor="middle" font-size="20">🛡️</text></g>
+      <g class="player keeper" data-sx="170" data-sy="455" data-x="170" data-y="455">
+        <circle r="20" fill="var(--keeper)" stroke="#fff" stroke-width="3"/><text y="7" text-anchor="middle" font-size="20">🧤</text></g>
+    </g>
+  </svg>
+  </div>
+
+  <div class="btnrow">
+    <button id="replay">▶ Näytä liike uudestaan</button>
+    <button id="oppBtn" class="toggled">🙈 Piilota vastustajat</button>
+  </div>
+  <div class="feedback" id="feedback" aria-live="polite"></div>
+  <p class="legend"><b class="blue">● Sininen</b> = meidän joukkue &nbsp;·&nbsp; <b class="red">● Punainen</b> = vastustaja</p>
+
+  <ul class="rules">
+    <li><span class="roleicon">⭐</span>Lähin yrittää heti voittaa pallon takaisin.</li>
+    <li><span class="roleicon">⚡</span>Lähellä olevat auttavat sulkemaan.</li>
+    <li><span class="roleicon">🛡️</span>Muut palaavat nopeasti omille paikoille.</li>
+  </ul>
+</main>
+<script>
+  const card=document.getElementById('card'),players=[...document.querySelectorAll('.player')],feedback=document.getElementById('feedback'),oppBtn=document.getElementById('oppBtn');
+  function place(p,x,y){p.style.transform='translate('+x+'px, '+y+'px)';}
+  function clearPicks(){feedback.textContent='';feedback.className='feedback';players.forEach(p=>p.classList.remove('picked-good','picked-warn'));}
+  function runAnimation(){card.classList.remove('done');clearPicks();const r=matchMedia('(prefers-reduced-motion: reduce)').matches;
+    players.forEach(p=>{if(r){place(p,+p.dataset.x,+p.dataset.y);return;}p.style.transition='none';place(p,+p.dataset.sx,+p.dataset.sy);p.getBoundingClientRect();p.style.transition='';place(p,+p.dataset.x,+p.dataset.y);});
+    setTimeout(()=>card.classList.add('done'),r?50:2900);}
+  function verdict(p){const s=p.dataset.side;
+    if(s==='mid')return{ok:true,msg:'Sinä olet lähin – yritä voittaa pallo heti takaisin! ✅'};
+    if(s==='wingL')return{ok:true,msg:'Autat läheltä – suljette pallon yhdessä. ✅'};
+    if(s==='wingR')return{ok:true,msg:'Palaat nopeasti auttamaan – hyvä! ✅'};
+    if(s==='backR')return{ok:true,msg:'Otit maalille juoksevan kiinni – tärkein tehtävä takana! ✅'};
+    if(s==='backL')return{ok:true,msg:'Pidät muodon takana – et ryntää. ✅'};
+    if(s==='karki')return{ok:true,msg:'Pysyt ylhäällä pelattavana – jos voitamme pallon, hyökätään heti! ✅'};
+    return{ok:true,msg:'Hyvä!'};}
+  players.forEach(p=>{if(p.classList.contains('keeper'))return;const pick=()=>{clearPicks();const v=verdict(p);p.classList.add(v.ok?'picked-good':'picked-warn');feedback.textContent=v.msg;feedback.classList.add(v.ok?'good':'warn');};
+    p.addEventListener('click',pick);p.querySelector('.jersey').addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();pick();}});});
+  oppBtn.addEventListener('click',()=>{const on=card.classList.toggle('show-opp');oppBtn.textContent=on?'🙈 Piilota vastustajat':'👥 Näytä vastustajat';oppBtn.classList.toggle('toggled',on);});
+  document.getElementById('replay').addEventListener('click',runAnimation);runAnimation();
+</script>
+</body>
+</html>
